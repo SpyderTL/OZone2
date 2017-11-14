@@ -55,6 +55,7 @@ struct class audio_class;
 struct class video_class;
 struct class network_class;
 struct class input_class;
+struct class storage_class;
 
 // Strings
 static char object_class_name[] = "Object";
@@ -92,6 +93,9 @@ static char network_class_type[] = "OZone.Network";
 
 static char input_class_name[] = "Input";
 static char input_class_type[] = "OZone.Input";
+
+static char storage_class_name[] = "Storage";
+static char storage_class_type[] = "OZone.Storage";
 
 // Object
 struct object* object_tostring(struct object* object)
@@ -387,10 +391,41 @@ struct method input_getjoysticks_method = { integer_zero_name, input_class_type,
 
 struct class input_class = { input_class_name, input_class_type, 3,{ &input_tostring_method, &object_getclass_method, &input_getjoysticks_method } };
 
+// Storage
+struct object* storage_tostring(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &string_class;
+	result->data = malloc(16);
+
+	ltoa(object->data, result->data, 10);
+
+	return result;
+}
+
+struct method storage_tostring_method = { object_tostring_name, string_class_type, 0, storage_tostring };
+
+struct object* storage_getdrives(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &storage_class;
+	result->data = malloc(sizeof(long));
+
+	result->data = 0L;
+
+	return result;
+}
+
+struct method storage_getdrives_method = { integer_zero_name, storage_class_type, 1, storage_getdrives };
+
+struct class storage_class = { storage_class_name, storage_class_type, 3,{ &storage_tostring_method, &object_getclass_method, &storage_getdrives_method } };
+
 // Classes
 const int class_count = 9;
 
-struct class* classes[] = { &object_class, &class_class, &string_class, &short_class, &integer_class, &system_class, &audio_class, &video_class, &network_class };
+struct class* classes[] = { &object_class, &class_class, &string_class, &short_class, &integer_class, &system_class, &audio_class, &video_class, &network_class, &input_class, &storage_class };
 
 int main(void)
 {
