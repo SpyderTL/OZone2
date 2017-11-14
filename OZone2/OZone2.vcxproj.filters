@@ -18,11 +18,11 @@
     <Text Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="makefile" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="src\test.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="makefile" />
   </ItemGroup>
 </Project>

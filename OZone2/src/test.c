@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <cc65.h>
 
+// Functions
 void parse(void);
 void parse_class(void);
 void parse_number(void);
@@ -15,9 +16,11 @@ void parse_function(void);
 void parse_method(void);
 void convert(void);
 
+// Globals
 char text[256];
 struct object* result;
 
+// Structs
 struct method
 {
 	char* name;
@@ -41,11 +44,19 @@ struct object
 	int length;
 };
 
+// Classes
 struct class object_class;
 struct class class_class;
 struct class string_class;
+struct class short_class;
 struct class integer_class;
+struct class system_class;
+struct class audio_class;
+struct class video_class;
+struct class network_class;
+struct class input_class;
 
+// Strings
 static char object_class_name[] = "Object";
 static char object_class_type[] = "OZone.Object";
 static char object_tostring_name[] = "ToString";
@@ -56,6 +67,10 @@ static char class_class_type[] = "OZone.Class";
 static char class_getname_name[] = "GetName";
 static char class_gettype_name[] = "GetType";
 
+static char short_class_name[] = "Short";
+static char short_class_type[] = "OZone.Short";
+static char short_zero_name[] = "Zero";
+
 static char integer_class_name[] = "Integer";
 static char integer_class_type[] = "OZone.Integer";
 static char integer_zero_name[] = "Zero";
@@ -63,6 +78,22 @@ static char integer_zero_name[] = "Zero";
 static char string_class_name[] = "String";
 static char string_class_type[] = "OZone.String";
 
+static char system_class_name[] = "System";
+static char system_class_type[] = "OZone.System";
+
+static char audio_class_name[] = "Audio";
+static char audio_class_type[] = "OZone.Audio";
+
+static char video_class_name[] = "Video";
+static char video_class_type[] = "OZone.Video";
+
+static char network_class_name[] = "Network";
+static char network_class_type[] = "OZone.Network";
+
+static char input_class_name[] = "Input";
+static char input_class_type[] = "OZone.Input";
+
+// Object
 struct object* object_tostring(struct object* object)
 {
 	return 0;
@@ -94,6 +125,7 @@ struct object* class_getname(struct object* object)
 	return result;
 }
 
+// Class
 struct method class_getname_method = { class_getname_name, string_class_type, 0, class_getname };
 
 struct object* class_gettype(struct object* object)
@@ -112,6 +144,7 @@ struct method class_tostring_method = { object_tostring_name, string_class_type,
 
 struct class class_class = { class_class_name, class_class_type, 4, { &class_tostring_method, &object_getclass_method, &class_getname_method, &class_gettype_method } };
 
+// String
 struct object* string_tostring(struct object* object)
 {
 	return object;
@@ -137,7 +170,8 @@ struct method string_length_method = { string_length_name, integer_class_type, 0
 
 struct class string_class = { string_class_name, string_class_type, 3, { &string_tostring_method, &string_length_method, &object_getclass_method } };
 
-struct object* integer_tostring(struct object* object)
+// Short
+struct object* short_tostring(struct object* object)
 {
 	struct object* result = malloc(sizeof(struct object));
 
@@ -149,13 +183,13 @@ struct object* integer_tostring(struct object* object)
 	return result;
 }
 
-struct method integer_tostring_method = { object_tostring_name, string_class_type, 0, integer_tostring };
+struct method short_tostring_method = { object_tostring_name, string_class_type, 0, short_tostring };
 
-struct object* integer_zero(struct object* object)
+struct object* short_zero(struct object* object)
 {
 	struct object* result = malloc(sizeof(struct object));
 
-	result->class = &integer_class;
+	result->class = &short_class;
 	result->data = malloc(sizeof(int));
 
 	result->data = 0;
@@ -163,13 +197,200 @@ struct object* integer_zero(struct object* object)
 	return result;
 }
 
+struct method short_zero_method = { short_zero_name, short_class_type, 1, short_zero };
+
+struct class short_class = { short_class_name, short_class_type, 3,{ &short_tostring_method, &object_getclass_method, &short_zero_method } };
+
+// Integer
+struct object* integer_tostring(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &string_class;
+	result->data = malloc(16);
+
+	ltoa(object->data, result->data, 10);
+
+	return result;
+}
+
+struct method integer_tostring_method = { object_tostring_name, string_class_type, 0, integer_tostring };
+
+struct object* integer_zero(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &integer_class;
+	result->data = malloc(sizeof(long));
+
+	result->data = 0L;
+
+	return result;
+}
+
 struct method integer_zero_method = { integer_zero_name, integer_class_type, 1, integer_zero };
 
-struct class integer_class = { integer_class_name, integer_class_type, 3, { &integer_tostring_method, &object_getclass_method, &integer_zero_method } };
+struct class integer_class = { integer_class_name, integer_class_type, 3,{ &integer_tostring_method, &object_getclass_method, &integer_zero_method } };
 
-const int class_count = 4;
+// System
+struct object* system_tostring(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
 
-struct class* classes[] = { &object_class, &class_class, &string_class, &integer_class };
+	result->class = &string_class;
+	result->data = malloc(16);
+
+	ltoa(object->data, result->data, 10);
+
+	return result;
+}
+
+struct method system_tostring_method = { object_tostring_name, string_class_type, 0, system_tostring };
+
+struct object* system_zero(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &system_class;
+	result->data = malloc(sizeof(long));
+
+	result->data = 0L;
+
+	return result;
+}
+
+struct method system_zero_method = { integer_zero_name, system_class_type, 1, system_zero };
+
+struct class system_class = { system_class_name, system_class_type, 3,{ &system_tostring_method, &object_getclass_method, &system_zero_method } };
+
+// Audio
+struct object* audio_tostring(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &string_class;
+	result->data = malloc(16);
+
+	ltoa(object->data, result->data, 10);
+
+	return result;
+}
+
+struct method audio_tostring_method = { object_tostring_name, string_class_type, 0, audio_tostring };
+
+struct object* audio_zero(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &audio_class;
+	result->data = malloc(sizeof(long));
+
+	result->data = 0L;
+
+	return result;
+}
+
+struct method audio_zero_method = { integer_zero_name, audio_class_type, 1, audio_zero };
+
+struct class audio_class = { audio_class_name, audio_class_type, 3,{ &audio_tostring_method, &object_getclass_method, &audio_zero_method } };
+
+// Video
+struct object* video_tostring(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &string_class;
+	result->data = malloc(16);
+
+	ltoa(object->data, result->data, 10);
+
+	return result;
+}
+
+struct method video_tostring_method = { object_tostring_name, string_class_type, 0, video_tostring };
+
+struct object* video_zero(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &video_class;
+	result->data = malloc(sizeof(long));
+
+	result->data = 0L;
+
+	return result;
+}
+
+struct method video_zero_method = { integer_zero_name, video_class_type, 1, video_zero };
+
+struct class video_class = { video_class_name, video_class_type, 3,{ &video_tostring_method, &object_getclass_method, &video_zero_method } };
+
+// Network
+struct object* network_tostring(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &string_class;
+	result->data = malloc(16);
+
+	ltoa(object->data, result->data, 10);
+
+	return result;
+}
+
+struct method network_tostring_method = { object_tostring_name, string_class_type, 0, network_tostring };
+
+struct object* network_zero(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &network_class;
+	result->data = malloc(sizeof(long));
+
+	result->data = 0L;
+
+	return result;
+}
+
+struct method network_zero_method = { integer_zero_name, network_class_type, 1, network_zero };
+
+struct class network_class = { network_class_name, network_class_type, 3,{ &network_tostring_method, &object_getclass_method, &network_zero_method } };
+
+// Input
+struct object* input_tostring(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &string_class;
+	result->data = malloc(16);
+
+	ltoa(object->data, result->data, 10);
+
+	return result;
+}
+
+struct method input_tostring_method = { object_tostring_name, string_class_type, 0, input_tostring };
+
+struct object* input_getjoysticks(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &input_class;
+	result->data = malloc(sizeof(long));
+
+	result->data = 0L;
+
+	return result;
+}
+
+struct method input_getjoysticks_method = { integer_zero_name, input_class_type, 1, input_getjoysticks };
+
+struct class input_class = { input_class_name, input_class_type, 3,{ &input_tostring_method, &object_getclass_method, &input_getjoysticks_method } };
+
+// Classes
+const int class_count = 9;
+
+struct class* classes[] = { &object_class, &class_class, &string_class, &short_class, &integer_class, &system_class, &audio_class, &video_class, &network_class };
 
 int main(void)
 {
