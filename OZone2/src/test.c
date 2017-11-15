@@ -63,6 +63,7 @@ struct class video_class;
 struct class network_class;
 struct class input_class;
 struct class storage_class;
+struct class floppydrive_class;
 
 // Strings
 static char object_class_name[] = "Object";
@@ -106,7 +107,10 @@ static char input_class_type[] = "OZone.Input";
 
 static char storage_class_name[] = "Storage";
 static char storage_class_type[] = "OZone.Storage";
-static char storage_getdrives_name[] = "GetDrives";
+static char storage_getfloppydrives_name[] = "GetFloppyDrives";
+
+static char floppydrive_class_name[] = "FloppyDrive";
+static char floppydrive_class_type[] = "OZone.Storage.FloppyDrive";
 
 // Object
 struct object* object_tostring(struct object* object)
@@ -243,7 +247,18 @@ struct object* list_count(struct object* object)
 
 struct method list_count_method = { list_count_name, integer_class_type, 0, list_count };
 
-struct class list_class = { list_class_name, list_class_type, 3, { &list_tostring_method, &list_count_method, &object_getclass_method } };
+static char list_first_name[] = "First";
+
+struct object* list_first(struct object* object)
+{
+	struct object* result = ((struct list*)object->data)->items[0];
+
+	return result;
+}
+
+struct method list_first_method = { list_first_name, object_class_type, 0, list_first };
+
+struct class list_class = { list_class_name, list_class_type, 4, { &list_tostring_method, &list_count_method, &list_first_method, &object_getclass_method } };
 
 // Short
 struct object* short_tostring(struct object* object)
@@ -477,7 +492,7 @@ struct object* storage_tostring(struct object* object)
 
 struct method storage_tostring_method = { object_tostring_name, string_class_type, 0, storage_tostring };
 
-struct object* storage_getdrives(struct object* object)
+struct object* storage_getfloppydrives(struct object* object)
 {
 	static int device;
 	static int count;
@@ -497,7 +512,7 @@ struct object* storage_getdrives(struct object* object)
 	while (device != INVALID_DEVICE)
 	{
 		item = malloc(sizeof(struct object));
-		item->class = &short_class;
+		item->class = &floppydrive_class;
 		item->data = malloc(sizeof(int));
 
 		item->data = device;
@@ -514,14 +529,93 @@ struct object* storage_getdrives(struct object* object)
 	return result;
 }
 
-struct method storage_getdrives_method = { storage_getdrives_name, storage_class_type, 1, storage_getdrives };
+struct method storage_getdrives_method = { storage_getfloppydrives_name, storage_class_type, 1, storage_getfloppydrives };
 
 struct class storage_class = { storage_class_name, storage_class_type, 3,{ &storage_tostring_method, &object_getclass_method, &storage_getdrives_method } };
 
-// Classes
-const int class_count = 12;
+// Floppy Drive
+char floppydrive_name[] = "Floppy Drive";
 
-struct class* classes[] = { &object_class, &class_class, &string_class, &list_class, &short_class, &integer_class, &system_class, &audio_class, &video_class, &network_class, &input_class, &storage_class };
+struct object* floppydrive_tostring(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &string_class;
+	result->data = floppydrive_name;
+
+	return result;
+}
+
+struct method floppydrive_tostring_method = { object_tostring_name, string_class_type, 0, floppydrive_tostring };
+
+char floppydrive_getdevicenumber_name[] = "GetDeviceNumber";
+
+struct object* floppydrive_getdevicenumber(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &short_class;
+	result->data = (int)object->data;
+
+	return result;
+}
+
+struct method floppydrive_getdevicenumber_method = { floppydrive_getdevicenumber_name, short_class_type, 0, floppydrive_getdevicenumber };
+
+char floppydrive_getfiles_name[] = "GetFiles";
+
+struct object* floppydrive_getfiles(struct object* object)
+{
+	static int device;
+	static int count;
+	static struct object* item;
+	static char filename[FILENAME_MAX];
+	static DIR* directory;
+	static struct dirent* entry;
+
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &list_class;
+	result->data = malloc(sizeof(struct list));
+
+	((struct list*)result->data)->items = malloc(sizeof(void*) * 32);
+
+	count = 0;
+
+	device = (int)object->data;
+
+	itoa(filename, device, 10);
+
+	chdir(filename);
+
+	directory = opendir(".");
+
+	while (entry = readdir(directory))
+	{
+		item = malloc(sizeof(struct object));
+		item->class = &string_class;
+		item->data = malloc(strlen(entry->d_name) + 1);
+
+		strcpy(item->data, entry->d_name);
+
+		((struct list*)result->data)->items[count] = item;
+
+		count++;
+	}
+
+	((struct list*)result->data)->count = count;
+
+	return result;
+}
+
+struct method floppydrive_getfiles_method = { floppydrive_getfiles_name, list_class_type, 0, floppydrive_getfiles };
+
+struct class floppydrive_class = { floppydrive_class_name, floppydrive_class_type, 4, { &floppydrive_tostring_method, &object_getclass_method, &floppydrive_getdevicenumber_method, &floppydrive_getfiles_method } };
+
+// Classes
+const int class_count = 13;
+
+struct class* classes[] = { &object_class, &class_class, &string_class, &list_class, &short_class, &integer_class, &system_class, &audio_class, &video_class, &network_class, &input_class, &storage_class, &floppydrive_class };
 
 int main(void)
 {
