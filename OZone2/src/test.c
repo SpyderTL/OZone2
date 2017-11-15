@@ -44,10 +44,17 @@ struct object
 	int length;
 };
 
+struct list
+{
+	int count;
+	void* items;
+};
+
 // Classes
 struct class object_class;
 struct class class_class;
 struct class string_class;
+struct class list_class;
 struct class short_class;
 struct class integer_class;
 struct class system_class;
@@ -79,6 +86,9 @@ static char integer_zero_name[] = "Zero";
 static char string_class_name[] = "String";
 static char string_class_type[] = "OZone.String";
 
+static char list_class_name[] = "List";
+static char list_class_type[] = "OZone.List";
+
 static char system_class_name[] = "System";
 static char system_class_type[] = "OZone.System";
 
@@ -96,6 +106,7 @@ static char input_class_type[] = "OZone.Input";
 
 static char storage_class_name[] = "Storage";
 static char storage_class_type[] = "OZone.Storage";
+static char storage_getdrives_name[] = "GetDrives";
 
 // Object
 struct object* object_tostring(struct object* object)
@@ -172,7 +183,33 @@ struct object* string_length(struct object* object)
 
 struct method string_length_method = { string_length_name, integer_class_type, 0, string_length };
 
-struct class string_class = { string_class_name, string_class_type, 3, { &string_tostring_method, &string_length_method, &object_getclass_method } };
+struct class string_class = { string_class_name, string_class_type, 3,{ &string_tostring_method, &string_length_method, &object_getclass_method } };
+
+// List
+struct object* list_tostring(struct object* object)
+{
+	return object;
+}
+
+struct method list_tostring_method = { object_tostring_name, string_class_type, 0, list_tostring };
+
+static char list_count_name[] = "Count";
+
+struct object* list_count(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &integer_class;
+	result->data = malloc(sizeof(int));
+
+	result->data = ((struct list*)object->data)->count;
+
+	return result;
+}
+
+struct method list_count_method = { list_count_name, integer_class_type, 0, list_count };
+
+struct class list_class = { list_class_name, list_class_type, 3, { &list_tostring_method, &list_count_method, &object_getclass_method } };
 
 // Short
 struct object* short_tostring(struct object* object)
@@ -203,7 +240,7 @@ struct object* short_zero(struct object* object)
 
 struct method short_zero_method = { short_zero_name, short_class_type, 1, short_zero };
 
-struct class short_class = { short_class_name, short_class_type, 3,{ &short_tostring_method, &object_getclass_method, &short_zero_method } };
+struct class short_class = { short_class_name, short_class_type, 3, { &short_tostring_method, &object_getclass_method, &short_zero_method } };
 
 // Integer
 struct object* integer_tostring(struct object* object)
@@ -408,24 +445,36 @@ struct method storage_tostring_method = { object_tostring_name, string_class_typ
 
 struct object* storage_getdrives(struct object* object)
 {
+	static int device;
+	static int count;
+
 	struct object* result = malloc(sizeof(struct object));
 
-	result->class = &storage_class;
-	result->data = malloc(sizeof(long));
+	result->class = &integer_class;
+	result->data = malloc(sizeof(int));
 
-	result->data = 0L;
+	device = getfirstdevice();
+
+	while (device != INVALID_DEVICE)
+	{
+		count++;
+
+		device = getnextdevice(device);
+	}
+
+	result->data = count;
 
 	return result;
 }
 
-struct method storage_getdrives_method = { integer_zero_name, storage_class_type, 1, storage_getdrives };
+struct method storage_getdrives_method = { storage_getdrives_name, storage_class_type, 1, storage_getdrives };
 
 struct class storage_class = { storage_class_name, storage_class_type, 3,{ &storage_tostring_method, &object_getclass_method, &storage_getdrives_method } };
 
 // Classes
-const int class_count = 9;
+const int class_count = 12;
 
-struct class* classes[] = { &object_class, &class_class, &string_class, &short_class, &integer_class, &system_class, &audio_class, &video_class, &network_class, &input_class, &storage_class };
+struct class* classes[] = { &object_class, &class_class, &string_class, &list_class, &short_class, &integer_class, &system_class, &audio_class, &video_class, &network_class, &input_class, &storage_class };
 
 int main(void)
 {
