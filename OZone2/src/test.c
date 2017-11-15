@@ -47,7 +47,7 @@ struct object
 struct list
 {
 	int count;
-	void* items;
+	struct object** items;
 };
 
 // Classes
@@ -188,7 +188,41 @@ struct class string_class = { string_class_name, string_class_type, 3,{ &string_
 // List
 struct object* list_tostring(struct object* object)
 {
-	return object;
+	static length;
+	static index;
+	static index2;
+	static struct object* item;
+	static struct object* string;
+
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &string_class;
+	result->data = malloc(sizeof(char) * 256);
+
+	strcpy(result->data, "");
+
+	length = 0;
+
+	for (index = 0; index < ((struct list*)object->data)->count; index++)
+	{
+		item = ((struct list*)object->data)->items[index];
+
+		for (index2 = 0; index2 < item->class->method_count; index2++)
+		{
+			if (item->class->methods[index2]->is_static == 0 &&
+				strcmp(item->class->methods[index2]->name, object_tostring_name) == 0)
+			{
+				string = item->class->methods[index2]->entry(item);
+
+				if (index != 0)
+					strcat(result->data, "\r\n");
+
+				strcat(result->data, string->data);
+			}
+		}
+	}
+
+	return result;
 }
 
 struct method list_tostring_method = { object_tostring_name, string_class_type, 0, list_tostring };
@@ -447,22 +481,35 @@ struct object* storage_getdrives(struct object* object)
 {
 	static int device;
 	static int count;
+	static struct object* item;
 
 	struct object* result = malloc(sizeof(struct object));
 
-	result->class = &integer_class;
-	result->data = malloc(sizeof(int));
+	result->class = &list_class;
+	result->data = malloc(sizeof(struct list));
+
+	((struct list*)result->data)->items = malloc(sizeof(void*) * 8);
+
+	count = 0;
 
 	device = getfirstdevice();
 
 	while (device != INVALID_DEVICE)
 	{
+		item = malloc(sizeof(struct object));
+		item->class = &short_class;
+		item->data = malloc(sizeof(int));
+
+		item->data = device;
+
+		((struct list*)result->data)->items[count] = item;
+
 		count++;
 
 		device = getnextdevice(device);
 	}
 
-	result->data = count;
+	((struct list*)result->data)->count = count;
 
 	return result;
 }
