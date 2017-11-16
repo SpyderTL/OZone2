@@ -373,21 +373,30 @@ struct object* audio_tostring(struct object* object)
 
 struct method audio_tostring_method = { object_tostring_name, string_class_type, 0, audio_tostring };
 
-struct object* audio_zero(struct object* object)
+char audio_test_name[] = "Test";
+
+#define SID_VOICE_CTRL(Noise, Pulse,	Saw, Triangle, Test, Ring, Sync, Gate) (Noise << 7 | Pulse << 6 | Saw << 5 | Triangle << 4 | Test << 3 | Ring << 2 | Sync << 1 | Gate)
+#define SID_AMP(Channel3Off, HighPass, BandPass, LowPass, Volume) (Channel3Off <<7 | HighPass << 6 | BandPass << 5 | LowPass << 4 | Volume);
+
+struct object* audio_test(struct object* object)
 {
-	struct object* result = malloc(sizeof(struct object));
+	SID.v1.freq = 0x1d1e;
+	SID.v1.ad = 0x00;
+	SID.v1.pw = 0x0800;
+	SID.v1.sr = 0xf0;
 
-	result->class = &audio_class;
-	result->data = malloc(sizeof(long));
+	SID.amp = SID_AMP(0, 0, 0, 0, 0x8);
 
-	result->data = 0L;
+	SID.v1.ctrl = SID_VOICE_CTRL(0, 0, 0, 1, 0, 0, 0, 1);
+
+	result = 0;
 
 	return result;
 }
 
-struct method audio_zero_method = { integer_zero_name, audio_class_type, 1, audio_zero };
+struct method audio_test_method = { audio_test_name, audio_class_type, 1, audio_test };
 
-struct class audio_class = { audio_class_name, audio_class_type, 3,{ &audio_tostring_method, &object_getclass_method, &audio_zero_method } };
+struct class audio_class = { audio_class_name, audio_class_type, 3,{ &audio_tostring_method, &object_getclass_method, &audio_test_method } };
 
 // Video
 struct object* video_tostring(struct object* object)
