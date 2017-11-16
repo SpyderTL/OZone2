@@ -233,16 +233,12 @@ struct object* video_tostring(struct object* object)
 	return result;
 }
 
-struct object* video_zero(struct object* object)
+struct object* video_test(struct object* object)
 {
-	struct object* result = malloc(sizeof(struct object));
+	VIC.spr0_color = COLOR_GRAY3;
+	VIC.spr_ena = 0%00000001;
 
-	result->class = &video_class;
-	result->data = malloc(sizeof(long));
-
-	result->data = 0L;
-
-	return result;
+	return 0;
 }
 
 // Network

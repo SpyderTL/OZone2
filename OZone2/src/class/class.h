@@ -202,14 +202,14 @@ static struct method audio_test_method = { audio_test_name, audio_class_type, 1,
 static struct class audio_class = { audio_class_name, audio_class_type, 3,{ &audio_tostring_method, &object_getclass_method, &audio_test_method } };
 
 // Video
-struct object* video_zero(struct object* object);
+struct object* video_test(struct object* object);
 struct object* video_tostring(struct object* object);
 
-static struct method video_zero_method = { integer_zero_name, video_class_type, 1, video_zero };
+static struct method video_test_method = { "Test", video_class_type, 1, video_test };
 
 static struct method video_tostring_method = { integer_zero_name, video_class_type, 0, video_tostring };
 
-static struct class video_class = { video_class_name, video_class_type, 3,{ &video_tostring_method, &object_getclass_method, &video_zero_method } };
+static struct class video_class = { video_class_name, video_class_type, 3,{ &video_tostring_method, &object_getclass_method, &video_test_method } };
 
 // Network
 struct object* network_zero(struct object* object);
