@@ -7,6 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <cc65.h>
+#include <joystick.h>
 
 // Functions
 void parse(void);
@@ -62,6 +63,7 @@ struct class audio_class;
 struct class video_class;
 struct class network_class;
 struct class input_class;
+struct class joystick_class;
 struct class storage_class;
 struct class floppydrive_class;
 
@@ -104,6 +106,9 @@ static char network_class_type[] = "OZone.Network";
 
 static char input_class_name[] = "Input";
 static char input_class_type[] = "OZone.Input";
+
+static char joystick_class_name[] = "Joystick";
+static char joystick_class_type[] = "OZone.Input.Joystick";
 
 static char storage_class_name[] = "Storage";
 static char storage_class_type[] = "OZone.Storage";
@@ -461,21 +466,76 @@ struct object* input_tostring(struct object* object)
 
 struct method input_tostring_method = { object_tostring_name, string_class_type, 0, input_tostring };
 
+char input_getjoysticks_name[] = "GetJoysticks";
+
 struct object* input_getjoysticks(struct object* object)
 {
+	static struct object* item;
+
 	struct object* result = malloc(sizeof(struct object));
 
-	result->class = &input_class;
-	result->data = malloc(sizeof(long));
+	result->class = &list_class;
+	result->data = malloc(sizeof(struct list));
 
-	result->data = 0L;
+	((struct list*)result->data)->items = malloc(sizeof(void*) * 2);
+
+	item = malloc(sizeof(struct object));
+
+	item->class = &joystick_class;
+	item->data = malloc(sizeof(int));
+
+	item->data = JOY_1;
+
+	((struct list*)result->data)->items[0] = item;
+
+	item = malloc(sizeof(struct object));
+
+	item->class = &joystick_class;
+	item->data = malloc(sizeof(int));
+
+	item->data = JOY_2;
+
+	((struct list*)result->data)->items[1] = item;
+
+	((struct list*)result->data)->count = 2;
 
 	return result;
 }
 
-struct method input_getjoysticks_method = { integer_zero_name, input_class_type, 1, input_getjoysticks };
+struct method input_getjoysticks_method = { input_getjoysticks_name, list_class_type, 1, input_getjoysticks };
 
 struct class input_class = { input_class_name, input_class_type, 3,{ &input_tostring_method, &object_getclass_method, &input_getjoysticks_method } };
+
+// Joystick
+char joystick_name[] = "Joystick";
+
+struct object* joystick_tostring(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &string_class;
+	result->data = joystick_name;
+
+	return result;
+}
+
+struct method joystick_tostring_method = { object_tostring_name, string_class_type, 0, joystick_tostring };
+
+char joystick_getstate_name[] = "GetState";
+
+struct object* joystick_getstate(struct object* object)
+{
+	struct object* result = malloc(sizeof(struct object));
+
+	result->class = &short_class;
+	result->data = joy_read((int)object->data);
+
+	return result;
+}
+
+struct method joystick_getstate_method = { joystick_getstate_name, short_class_type, 0, joystick_getstate };
+
+struct class joystick_class = { joystick_class_name, joystick_class_type, 3,{ &joystick_tostring_method, &object_getclass_method, &joystick_getstate_method } };
 
 // Storage
 struct object* storage_tostring(struct object* object)
@@ -613,17 +673,21 @@ struct method floppydrive_getfiles_method = { floppydrive_getfiles_name, list_cl
 struct class floppydrive_class = { floppydrive_class_name, floppydrive_class_type, 4, { &floppydrive_tostring_method, &object_getclass_method, &floppydrive_getdevicenumber_method, &floppydrive_getfiles_method } };
 
 // Classes
-const int class_count = 13;
+const int class_count = 14;
 
-struct class* classes[] = { &object_class, &class_class, &string_class, &list_class, &short_class, &integer_class, &system_class, &audio_class, &video_class, &network_class, &input_class, &storage_class, &floppydrive_class };
+struct class* classes[] = { &object_class, &class_class, &string_class, &list_class, &short_class, &integer_class, &system_class, &audio_class, &video_class, &network_class, &input_class, &joystick_class, &storage_class, &floppydrive_class };
 
 int main(void)
 {
+	static int joystick1;
+
 	textcolor(COLOR_WHITE);
 	bgcolor(COLOR_BLACK);
 	bordercolor(COLOR_BLACK);
 
 	clrscr();
+
+	joy_install(joy_static_stddrv);
 
 	while (1)
 	{
@@ -683,12 +747,12 @@ start:
 
 	goto class;
 
-class:
-	if (index == text_length)
-	{
-		parse_class();
-		return;
-	}
+	class :
+		if (index == text_length)
+		{
+			parse_class();
+			return;
+		}
 
 	character = text[index++];
 
@@ -875,9 +939,9 @@ void parse_class()
 {
 	int class;
 
-	for(class = 0; class < class_count; class++)
+	for (class = 0; class < class_count; class++)
 	{
-		if(strcmp(classes[class]->name, token) == 0)
+		if (strcmp(classes[class]->name, token) == 0)
 		{
 			result = malloc(sizeof(struct object));
 
