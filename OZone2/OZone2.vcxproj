@@ -46,9 +46,9 @@
     <LibraryPath>C:\cc65\lib</LibraryPath>
     <LibraryWPath />
     <ExcludePath />
-    <NMakeBuildCommandLine>cl65 $(ProjectDir)src\test.c</NMakeBuildCommandLine>
+    <NMakeBuildCommandLine>cl65 $(ProjectDir)src\test.c $(ProjectDir)src\class\class.c</NMakeBuildCommandLine>
     <SourcePath>$(VC_SourcePath);</SourcePath>
-    <NMakeReBuildCommandLine>cl65 $(ProjectDir)src\test.c</NMakeReBuildCommandLine>
+    <NMakeReBuildCommandLine>cl65 $(ProjectDir)src\test.c $(ProjectDir)src\class\class.c</NMakeReBuildCommandLine>
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <NMakeCleanCommandLine>del $(ProjectDir)src\test.</NMakeCleanCommandLine>
     <ReferencePath />
@@ -89,6 +89,7 @@ rmdir /S /Q "$(SolutionDir)Release"</NMakeCleanCommandLine>
     <None Include="makefile" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\class\class.c" />
     <ClCompile Include="src\test.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
