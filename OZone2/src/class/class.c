@@ -235,8 +235,23 @@ struct object* video_tostring(struct object* object)
 
 struct object* video_test(struct object* object)
 {
-	VIC.spr0_color = COLOR_GRAY3;
-	VIC.spr_ena = 0%00000001;
+	static int address;
+	
+	address = 0x0200;
+
+	//VIC.spr0_color = COLOR_WHITE;
+	//VIC.spr0_x = 23;
+	//VIC.spr0_y = 50;
+
+	//(*(unsigned char*)0x07f8) = 0x08;
+
+	//while (address <= 0x0262)
+	//{
+	//	(*(unsigned char*)address) = 0xaa;
+	//	address++;
+	//}
+
+	//VIC.spr_ena = 0x01;
 
 	return 0;
 }
