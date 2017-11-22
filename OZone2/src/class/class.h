@@ -1,17 +1,6 @@
 #ifndef OZONE_CLASS_H
 #define OZONE_CLASS_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <conio.h>
-#include <c64.h>
-#include <device.h>
-#include <dirent.h>
-#include <string.h>
-#include <unistd.h>
-#include <cc65.h>
-#include <joystick.h>
-
 // Structs
 struct method
 {
@@ -276,6 +265,10 @@ static const int class_count = 14;
 static const struct class* classes[] = { &object_class, &class_class, &string_class, &list_class, &short_class, &integer_class, &system_class, &audio_class, &video_class, &network_class, &input_class, &joystick_class, &storage_class, &floppydrive_class };
 
 #define SID_VOICE_CTRL(Noise, Pulse,	Saw, Triangle, Test, Ring, Sync, Gate) (Noise << 7 | Pulse << 6 | Saw << 5 | Triangle << 4 | Test << 3 | Ring << 2 | Sync << 1 | Gate)
-#define SID_AMP(Channel3Off, HighPass, BandPass, LowPass, Volume) (Channel3Off <<7 | HighPass << 6 | BandPass << 5 | LowPass << 4 | Volume);
+#define SID_AMP(Channel3Off, HighPass, BandPass, LowPass, Volume) (Channel3Off << 7 | HighPass << 6 | BandPass << 5 | LowPass << 4 | Volume);
 
+#define VIC_CTRL1(interrupt_raster_line, extended_background_mode, bitmap_mode, screen_enable, row_25_enable, vertical_scroll) (interrupt_raster_line << 7 | extended_background_mode << 6 | bitmap_mode << 5 | screen_enable << 4 | row_25_enable << 3 | vertical_scroll)
+#define VIC_CTRL2(multicolor_mode, column_40_enable, horizontal_scroll) (multicolor_mode << 4 | column_40_enable << 3 | horizontal_scroll)
+
+#define VIC_ADDR(character_address, bitmap_address, screen_address) (character_address >> 10 | bitmap_address >> 10 | screen_address >> 6)
 #endif

@@ -1,3 +1,14 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
+#include <c64.h>
+#include <device.h>
+#include <dirent.h>
+#include <string.h>
+#include <unistd.h>
+#include <cc65.h>
+#include <joystick.h>
+
 #include "class.h"
 
 // Object
@@ -235,23 +246,59 @@ struct object* video_tostring(struct object* object)
 
 struct object* video_test(struct object* object)
 {
-	static int address;
-	
-	address = 0x0200;
+	static unsigned char color;
+	static unsigned char value;
+	static int addr;
 
-	//VIC.spr0_color = COLOR_WHITE;
+	VIC.ctrl1 = VIC_CTRL1(0, 0, 1, 0, 1, 3);
+	VIC.ctrl2 = VIC_CTRL2(0, 1, 0);
+
+	VIC.addr = VIC_ADDR(0, 0x2000, 0x0400);
+
+	VIC.ctrl1 = VIC_CTRL1(0, 0, 1, 1, 1, 3);
+
+	color = 0x00;
+
+	while (1)
+	{
+		value = ((color & 0xf) << 4) | (color & 0xf);
+
+		waitvsync();
+
+		for (addr = 0x0400; addr < 0x07e8; addr++)
+		{
+			(*(unsigned char*)addr) = value;
+		}
+
+		color++;
+	}
+
+	return 0;
+}
+
+struct object* video_testsprites(struct object* object)
+{
+	static int index;
+	static int address = 0x0400;
+
+	address = (address + 63) & ~63;  // Align to 64 bytes
+
+	VIC.spr0_color = COLOR_WHITE;
 	//VIC.spr0_x = 23;
 	//VIC.spr0_y = 50;
+	VIC.spr0_x = 23 + 100;
+	VIC.spr0_y = 50 + 100;
 
-	//(*(unsigned char*)0x07f8) = 0x08;
+	(*(unsigned char*)0x07f8) = (unsigned char)(address / 64);
 
-	//while (address <= 0x0262)
-	//{
-	//	(*(unsigned char*)address) = 0xaa;
-	//	address++;
-	//}
+	for (index = 0; index < 63; index++)
+	{
+		(*(unsigned char*)address) = 0xaa;
+		//(*(unsigned char*)address) = 0xff;
+		address++;
+	}
 
-	//VIC.spr_ena = 0x01;
+	VIC.spr_ena = 0x01;
 
 	return 0;
 }
