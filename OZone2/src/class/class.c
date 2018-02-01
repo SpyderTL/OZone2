@@ -10,6 +10,7 @@
 #include <joystick.h>
 
 #include "class.h"
+#include "list.h"
 
 // Object
 struct object* object_tostring(struct object* object)
@@ -62,65 +63,6 @@ struct object* string_length(struct object* object)
 	result->data = malloc(sizeof(int));
 
 	result->data = strlen(object->data);
-
-	return result;
-}
-
-// List
-struct object* list_tostring(struct object* object)
-{
-	static int length;
-	static int index;
-	static int index2;
-	static struct object* item;
-	static struct object* string;
-
-	struct object* result = malloc(sizeof(struct object));
-
-	result->class = &string_class;
-	result->data = malloc(sizeof(char) * 256);
-
-	strcpy(result->data, "");
-
-	length = 0;
-
-	for (index = 0; index < ((struct list*)object->data)->count; index++)
-	{
-		item = ((struct list*)object->data)->items[index];
-
-		for (index2 = 0; index2 < item->class->method_count; index2++)
-		{
-			if (item->class->methods[index2]->is_static == 0 &&
-				strcmp(item->class->methods[index2]->name, object_tostring_name) == 0)
-			{
-				string = item->class->methods[index2]->entry(item);
-
-				if (index != 0)
-					strcat(result->data, "\r\n");
-
-				strcat(result->data, string->data);
-			}
-		}
-	}
-
-	return result;
-}
-
-struct object* list_count(struct object* object)
-{
-	struct object* result = malloc(sizeof(struct object));
-
-	result->class = &integer_class;
-	result->data = malloc(sizeof(int));
-
-	result->data = ((struct list*)object->data)->count;
-
-	return result;
-}
-
-struct object* list_first(struct object* object)
-{
-	struct object* result = ((struct list*)object->data)->items[0];
 
 	return result;
 }
@@ -229,78 +171,6 @@ struct object* audio_test(struct object* object)
 	result = 0;
 
 	return result;
-}
-
-// Video
-struct object* video_tostring(struct object* object)
-{
-	struct object* result = malloc(sizeof(struct object));
-
-	result->class = &string_class;
-	result->data = malloc(16);
-
-	ltoa(object->data, result->data, 10);
-
-	return result;
-}
-
-struct object* video_test(struct object* object)
-{
-	static unsigned char color;
-	static unsigned char value;
-	static int addr;
-
-	VIC.ctrl1 = VIC_CTRL1(0, 0, 1, 0, 1, 3);
-	VIC.ctrl2 = VIC_CTRL2(0, 1, 0);
-
-	VIC.addr = VIC_ADDR(0, 0x2000, 0x0400);
-
-	VIC.ctrl1 = VIC_CTRL1(0, 0, 1, 1, 1, 3);
-
-	color = 0x00;
-
-	while (1)
-	{
-		value = ((color & 0xf) << 4) | (color & 0xf);
-
-		waitvsync();
-
-		for (addr = 0x0400; addr < 0x07e8; addr++)
-		{
-			(*(unsigned char*)addr) = value;
-		}
-
-		color++;
-	}
-
-	return 0;
-}
-
-struct object* video_testsprites(struct object* object)
-{
-	static int index;
-	static int address = 0x0400;
-
-	address = (address + 63) & ~63;  // Align to 64 bytes
-
-	VIC.spr0_color = COLOR_WHITE;
-	//VIC.spr0_x = 23;
-	//VIC.spr0_y = 50;
-	VIC.spr0_x = 23 + 100;
-	VIC.spr0_y = 50 + 100;
-
-	(*(unsigned char*)0x07f8) = (unsigned char)(address / 64);
-
-	for (index = 0; index < 63; index++)
-	{
-		(*(unsigned char*)address) = 0xaa;
-		//(*(unsigned char*)address) = 0xff;
-		address++;
-	}
-
-	VIC.spr_ena = 0x01;
-
-	return 0;
 }
 
 // Network

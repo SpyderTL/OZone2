@@ -2,13 +2,11 @@
 #include <stdlib.h>
 #include <conio.h>
 #include <c64.h>
-#include <device.h>
-#include <dirent.h>
 #include <string.h>
-#include <unistd.h>
-#include <cc65.h>
 #include <joystick.h>
 #include "class\class.h"
+#include "class\video.h"
+#include "class\list.h"
 
 // Functions
 void parse(void);
@@ -21,6 +19,9 @@ void convert(void);
 // Globals
 char text[256];
 struct object* result;
+
+static const int class_count = 14;
+static const struct class* classes[] = { &object_class, &class_class, &string_class, &list_class, &short_class, &integer_class, &system_class, &audio_class, &video_class, &network_class, &input_class, &joystick_class, &storage_class, &floppydrive_class };
 
 int main(void)
 {

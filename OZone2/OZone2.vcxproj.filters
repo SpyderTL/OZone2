@@ -27,9 +27,21 @@
     <ClCompile Include="src\class\class.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\class\video.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\class\list.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\class\class.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\class\video.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\class\list.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
